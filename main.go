@@ -55,6 +55,21 @@ func addAlbum(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"success": "Successfully created!"})
 }
 
+// updateAlbum updates a exist album
+func updateAlbum(c *gin.Context) {
+	var updatedAlbum Album
+	if err := c.BindJSON(&updatedAlbum); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	_, err := db.Exec("UPDATE album SET title = ?, artist = ?, price = ? WHERE id = ?", updatedAlbum.Title, updatedAlbum.Artist, updatedAlbum.Price, updatedAlbum.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": "Successfully updated!"})
+}
+
 func main() {
 
 	var err error
@@ -71,5 +86,6 @@ func main() {
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
 	router.PUT("/albums", addAlbum)
+	router.POST("/albums", updateAlbum)
 	router.Run("localhost:8080")
 }
